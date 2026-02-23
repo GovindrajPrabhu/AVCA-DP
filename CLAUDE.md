@@ -16,22 +16,27 @@ An AI-powered investment management tool for venture teams. It does two things:
 ```
 AVCA/
 ├── CLAUDE.md                          ← You are here. Instructions for Claude.
+├── README.md                          ← User-facing documentation
 ├── detect_new_files.sh                ← Run to check for unprocessed files
 ├── Claude Summary/                    ← All Claude-generated outputs
-│   ├── Portfolio Dashboard.html       ← One-page view of all companies (open in browser)
-│   ├── Red Flags & Follow-ups.html   ← Action items, warnings, promises to track
-│   ├── Promise Tracker.html          ← Accountability dashboard — tracks company commitments
-│   ├── Collaboration Opportunities.html ← Cross-portfolio synergies (externally shareable)
-│   ├── Deal Flow.html                ← Pitch evaluation & prioritization dashboard
-│   ├── Team Update - {Mon} {Year}.html ← Shareable update for the team
-│   ├── Running Summary.md             ← Detailed per-company analysis
-│   └── Monthly Report - {Mon} {Year}.md ← End-of-month compilation
+│   ├── Portfolio Dashboard.html       ← Template (empty). Claude populates with company rows.
+│   ├── Red Flags & Follow-ups.html   ← Template (empty). Claude adds flags per company.
+│   ├── Promise Tracker.html          ← Template (empty). Claude adds promise entries.
+│   ├── Collaboration Opportunities.html ← Template (empty). Claude adds synergy entries.
+│   ├── Deal Flow.html                ← Template (empty). Claude adds pitch cards.
+│   ├── Team Update - Template.html   ← HTML template structure; Claude creates dated copies.
+│   ├── Monthly Report - Template.md  ← Markdown template; Claude creates dated copies.
+│   ├── Team Update - {Mon} {Year}.html ← Generated (gitignored). Shareable team summary.
+│   ├── Running Summary.md             ← Generated (gitignored). Detailed per-company analysis.
+│   └── Monthly Report - {Mon} {Year}.md ← Generated (gitignored). End-of-month compilation.
 ├── Deal Flow/                         ← Incoming pitches for evaluation
 │   ├── README.md                      ← Instructions for the team
 │   ├── {Sector} - {Company X}/        ← One folder per pitch
 │   │   └── Pitch Deck.pdf
 │   └── {Sector} - {Company Y}/
 │       └── Series A Deck.pdf
+├── Sample - Company Name/             ← Placeholder folder showing expected structure (delete when ready)
+│   └── README.md
 ├── {Sector} - {Company A}/            ← One folder per portfolio company
 │   ├── Q3 FY26 Update.pdf
 │   ├── MIS Dec 2025.xlsx
@@ -40,6 +45,18 @@ AVCA/
 │   └── ...
 └── .gitignore
 ```
+
+### Template Files vs Generated Outputs
+The `Claude Summary/` folder ships with two types of files:
+
+**Tracked templates** (committed, contain no company data):
+- `Portfolio Dashboard.html`, `Red Flags & Follow-ups.html`, `Promise Tracker.html`, `Collaboration Opportunities.html`, `Deal Flow.html` — Claude edits these in place, adding data rows/cards/sections as companies are processed.
+- `Team Update - Template.html`, `Monthly Report - Template.md` — These are blank structural templates. Do NOT overwrite them. When generating a Team Update or Monthly Report, Claude creates a **new dated file** (e.g., `Team Update - Feb 2026.html`).
+
+**Generated outputs** (gitignored, contain company data):
+- `Running Summary.md` — appended to each cycle
+- `Team Update - {Mon} {Year}.html` — new file each month
+- `Monthly Report - {Mon} {Year}.md` — new file each month
 
 ## Folder Naming Convention
 Company folders MUST follow: `{Sector} - {Company Name}/`
@@ -79,6 +96,7 @@ All company data processed by this tool is **confidential**.
 **Git protections:**
 - **If the user asks to push to a remote:** warn them that the HTML dashboard files may contain company data and suggest they verify `git diff` before pushing. Do not push without this warning.
 - The `.gitignore` is pre-configured to block raw data files (PDF, Excel, PPT, CSV, DOC) and generated markdown outputs. Do not modify `.gitignore` to weaken these protections.
+- **GitHub web upload bypasses `.gitignore`:** Files uploaded via GitHub's web UI ("Add files via upload") are committed directly and bypass all `.gitignore` rules. If the user uploads company files through GitHub's web interface, those files WILL be committed — even PDFs, Excel files, and other blocked types. Warn the user if you see evidence of this pattern (e.g., UUID-named files or company documents appearing in tracked directories).
 
 ### One company at a time
 Process ONE company per cycle. Read all files for that company, write the summary, update the dashboard and red flags, then STOP and ask which company to pick next. This keeps context clean and prevents mixing up data between companies.
@@ -98,6 +116,24 @@ After processing each **portfolio company**, update ALL FIVE outputs:
 
 ### Always end with a question
 After completing a company, ask the user which company to process next. Don't chain automatically.
+
+## Current Repository State
+<!-- This section reflects the actual state of the repository as of last update -->
+
+**Template files in `Claude Summary/` (tracked, empty):**
+- `Portfolio Dashboard.html` — empty template, no companies processed
+- `Red Flags & Follow-ups.html` — empty template
+- `Promise Tracker.html` — empty template
+- `Collaboration Opportunities.html` — empty template
+- `Deal Flow.html` — empty template, no pitches evaluated
+- `Team Update - Template.html` — structural template for team updates
+- `Monthly Report - Template.md` — structural template for monthly reports
+
+**Data files currently present:**
+- `Claude Summary/9f115cb6-b066-40f0-b52a-688c216c744e.pdf` — **Data privacy warning:** This PDF was uploaded via GitHub's web UI and committed despite `.gitignore` rules. Review this file and remove it with `git rm "Claude Summary/9f115cb6-b066-40f0-b52a-688c216c744e.pdf"` if it contains confidential data.
+
+**Sample folder:**
+- `Sample - Company Name/README.md` — Placeholder showing expected folder structure. Delete this folder before use or use it as a guide.
 
 ## Portfolio Companies
 <!-- Add your companies here as you create folders. Claude will auto-detect new ones. -->
@@ -121,11 +157,19 @@ _No pitches evaluated yet. Drop pitch documents into Deal Flow/ subfolders and r
 
 ## Workflows
 
+### How `detect_new_files.sh` Works
+The script does two passes — portfolio companies then Deal Flow pitches. For each file it finds, it checks whether the **filename** (not path) appears anywhere in `CLAUDE.md`. If not found, the file is reported as unprocessed.
+
+This means:
+- Once you mark a file as processed in the Key Files Processed tracker (`- [x] Folder / Filename`), the script will stop reporting it.
+- Two files with the same filename in different folders would both be considered processed after the first one is tracked. Use unique filenames when possible.
+- The script skips: `Claude Summary/`, `.claude/`, `.git/`, `CLAUDE.md`, `README.md` (all READMEs), `detect_new_files.sh`, `.gitignore`, and hidden files.
+
 ### 1. Processing New Updates
 1. **Detect new files:** Run `bash detect_new_files.sh` or ask Claude to scan for new files
 2. **Process one company at a time.** Claude reads the files, extracts data, writes the summary following the Standard Template below
 3. **After each company, Claude updates five outputs:** Running Summary, Dashboard (HTML), Red Flags (HTML), Promise Tracker (HTML), Collaboration Opportunities (HTML)
-4. **After all companies are done:** Claude generates/updates the Team Update HTML
+4. **After all companies are done:** Claude generates the Team Update — create a NEW dated file `Team Update - {Mon} {Year}.html` (e.g., `Team Update - Feb 2026.html`). Use `Team Update - Template.html` in `Claude Summary/` as the structural reference. Do NOT overwrite the template.
 5. **At end of month:** Claude compiles the Monthly Report from Dashboard + Red Flags + Promise Tracker + Running Summary
 
 ### 2. Incremental Updates (Same Company, New Quarter)
@@ -137,9 +181,10 @@ When a new file arrives for a company already in the Running Summary:
 - **Collaboration review:** Re-assess collaboration opportunities now that new data is available. Update existing opportunities or add new ones.
 
 ### 3. Monthly Report
-At end of each month, compile all updates into `Monthly Report - {Month} {Year}.md`:
-- Portfolio-level summary (total revenue, key themes)
-- Per-company: financials, operations, key signals (good and bad), action items
+At end of each month, compile all updates into a new file `Monthly Report - {Month} {Year}.md` (e.g., `Monthly Report - Feb 2026.md`):
+- Use `Claude Summary/Monthly Report - Template.md` as the structural reference
+- Create the dated file as a NEW file (do not overwrite the template)
+- Contents: Portfolio-level summary (total revenue, key themes), per-company financials and key signals, action items
 - Use the Dashboard for the overview and Red Flags for the action items
 
 ### 4. Processing Incoming Pitches
