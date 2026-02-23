@@ -118,6 +118,7 @@ _No files processed yet. Drop update files into company folders and run Claude._
 <!-- Format: - [x] Deal Flow / {Sector} - {Company} / Filename (evaluated DATE, score: XX, priority: High/Medium/Low/Pass) -->
 
 - [x] Deal Flow / Clean Tech - Enviro / 3ac0829c-1254-45b2-b353-e41e57d87bbe.pdf (evaluated 2026-02-23, score: 72, priority: Medium)
+- [x] Deal Flow / Spacetech - Aadyah Aerospace / 260108_Aadyah_Series A_India_v80-5MN.pdf (evaluated 2026-02-23, score: 81, priority: High)
 
 ## Workflows
 
