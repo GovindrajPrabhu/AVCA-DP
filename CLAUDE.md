@@ -117,7 +117,7 @@ _No files processed yet. Drop update files into company folders and run Claude._
 <!-- Claude updates this automatically as pitches are evaluated -->
 <!-- Format: - [x] Deal Flow / {Sector} - {Company} / Filename (evaluated DATE, score: XX, priority: High/Medium/Low/Pass) -->
 
-_No pitches evaluated yet. Drop pitch documents into Deal Flow/ subfolders and run Claude._
+- [x] Deal Flow / Spacetech - Aadyah Aerospace / 260108_Aadyah_Series A_India_v80-5MN.pdf (evaluated 2026-02-23, score: 72, priority: Medium)
 
 ## Workflows
 
